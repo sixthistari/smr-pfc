@@ -43,10 +43,13 @@ _EL3 = Element(
     confidence=0.85,
 )
 
+# Updated to use cross-table Relationship format (Option C)
 _REL = Relationship(
     id="rel-001",
-    source_element_id="comp-doc-intel",
-    target_element_id="svc-vector-search",
+    source_table="solution_architecture",
+    source_id="comp-doc-intel",
+    target_table="solution_architecture",
+    target_id="svc-vector-search",
     archimate_type="serving-relationship",
     description="Pipeline feeds search service",
     confidence=0.8,
@@ -141,10 +144,8 @@ async def test_search_elements_type_filter(db: str) -> None:
 
 
 async def test_upsert_relationship(db: str) -> None:
-    """upsert_relationship inserts a relationship."""
+    """upsert_relationship inserts a cross-table relationship."""
     async with get_connection(db) as conn:
-        await upsert_element(conn, _EL1)
-        await upsert_element(conn, _EL2)
         await upsert_relationship(conn, _REL)
         async with conn.execute("SELECT COUNT(*) as c FROM relationships") as cur:
             row = await cur.fetchone()
@@ -153,10 +154,8 @@ async def test_upsert_relationship(db: str) -> None:
 
 
 async def test_upsert_relationship_idempotent(db: str) -> None:
-    """Upserting same relationship twice doesn't duplicate."""
+    """Upserting same relationship twice (same id) doesn't duplicate."""
     async with get_connection(db) as conn:
-        await upsert_element(conn, _EL1)
-        await upsert_element(conn, _EL2)
         await upsert_relationship(conn, _REL)
         await upsert_relationship(conn, _REL)
         async with conn.execute("SELECT COUNT(*) as c FROM relationships") as cur:
