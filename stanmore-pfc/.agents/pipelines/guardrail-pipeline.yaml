@@ -1,0 +1,51 @@
+# Guardrail Pipeline — Azure DevOps Pipeline Template
+# Trigger: On commit/push to wiki repository (PR changes)
+# Agent: guardrail (UC-7)
+# Documentation artifact — configure in ADO before running.
+
+trigger:
+  branches:
+    include:
+      - main
+      - feature/*
+  paths:
+    include:
+      - stanmore-pfc/specs/**/*.md
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - name: PFC_WORKSPACE
+    value: $(Build.SourcesDirectory)/stanmore-pfc
+  - group: pfc-secrets  # Contains ANTHROPIC_API_KEY
+
+steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: "3.12"
+    displayName: Set up Python 3.12
+
+  - script: |
+      pip install uv
+      uv sync --extra dev
+    displayName: Install dependencies
+
+  - script: |
+      # Get list of changed spec files from the PR diff
+      CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD -- 'stanmore-pfc/specs/**/*.md')
+      for FILE in $CHANGED_FILES; do
+        echo "Running guardrail on: $FILE"
+        uv run python -m ea_workbench.agents.guardrail "$FILE"
+      done
+    displayName: Run guardrail on changed specs
+    env:
+      PFC_WORKSPACE: $(PFC_WORKSPACE)
+      ANTHROPIC_API_KEY: $(ANTHROPIC_API_KEY)
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: $(PFC_WORKSPACE)/.staging/work
+      ArtifactName: guardrail-reviews
+    displayName: Publish guardrail reviews
+    condition: always()

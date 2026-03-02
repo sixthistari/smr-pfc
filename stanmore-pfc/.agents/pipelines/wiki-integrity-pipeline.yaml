@@ -1,0 +1,47 @@
+# Wiki Integrity Pipeline — Azure DevOps Pipeline Template
+# Trigger: Weekly scheduled run
+# Agent: wiki-integrity (UC-13)
+# Documentation artifact — configure in ADO before running.
+
+trigger: none
+
+schedules:
+  - cron: "0 6 * * 1"  # Every Monday at 06:00 UTC
+    displayName: Weekly wiki integrity check
+    branches:
+      include:
+        - main
+    always: true
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - name: PFC_WORKSPACE
+    value: $(Build.SourcesDirectory)/stanmore-pfc
+  - group: pfc-secrets  # Contains ANTHROPIC_API_KEY
+
+steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: "3.12"
+    displayName: Set up Python 3.12
+
+  - script: |
+      pip install uv
+      uv sync --extra dev
+    displayName: Install dependencies
+
+  - script: |
+      uv run python -m ea_workbench.agents.wiki_integrity
+    displayName: Run wiki integrity check
+    env:
+      PFC_WORKSPACE: $(PFC_WORKSPACE)
+      ANTHROPIC_API_KEY: $(ANTHROPIC_API_KEY)
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: $(PFC_WORKSPACE)/.agents/runs
+      ArtifactName: wiki-integrity-reports
+    displayName: Publish integrity reports
+    condition: always()
