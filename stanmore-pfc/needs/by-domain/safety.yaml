@@ -1,0 +1,6 @@
+# Stanmore PFC — Safety Domain Needs Register
+# Schema: REQUIREMENTS.md §3A.3
+# Each need represents a stakeholder goal (ArchiMate: goal) — solution-independent.
+# Populate via engagement sessions captured in needs/engagements/.
+
+needs: []

@@ -1,10 +1,12 @@
-version: "1.0"
-last_updated: "2026-03-02"
 items:
-  - id: "STD-001"
-    title: "Dual-Track Architecture"
-    status: "active"
-    created_at: "2026-02-20"
-    file: "STD-001-dual-track.md"
-    domain: "enterprise"
-    summary: "Formal governed processes (Track 1) use deterministic workflows; informal processes (Track 2) use autonomous agents with guardrails"
+- created_at: '2026-02-20'
+  domain: enterprise
+  file: STD-001-dual-track.md
+  id: STD-001
+  status: active
+  summary: Formal governed processes (Track 1) use deterministic workflows; informal
+    processes (Track 2) use autonomous agents with guardrails
+  title: Dual-Track Architecture
+  updated_at: '2026-03-01'
+last_updated: '2026-03-02'
+version: '1.0'

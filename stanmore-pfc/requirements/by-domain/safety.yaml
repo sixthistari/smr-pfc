@@ -1,0 +1,6 @@
+# Stanmore PFC — Safety Domain Requirements Register
+# Schema: REQUIREMENTS.md §3A.4
+# Each requirement is a solution attribute (ArchiMate: requirement) derived from a need.
+# Trace back to needs via traces_to_need field.
+
+requirements: []

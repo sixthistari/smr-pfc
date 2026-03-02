@@ -1,10 +1,12 @@
-version: "1.0"
-last_updated: "2026-03-02"
 items:
-  - id: "PRI-001"
-    title: "The Specification Imperative"
-    status: "active"
-    created_at: "2026-02-20"
-    file: "PRI-001-spec-imperative.md"
-    domain: "enterprise"
-    summary: "As AI assumes implementation, precise articulation of intent becomes the irreplaceable human contribution"
+- created_at: '2026-02-20'
+  domain: enterprise
+  file: PRI-001-spec-imperative.md
+  id: PRI-001
+  status: active
+  summary: As AI assumes implementation, precise articulation of intent becomes the
+    irreplaceable human contribution
+  title: The Specification Imperative
+  updated_at: '2026-03-01'
+last_updated: '2026-03-02'
+version: '1.0'

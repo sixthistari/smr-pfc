@@ -1,10 +1,12 @@
-version: "1.0"
-last_updated: "2026-03-02"
 items:
-  - id: "IDEA-001"
-    title: "Meta-agent definition pattern"
-    status: "parked"
-    created_at: "2026-02-28"
-    file: "IDEA-001-meta-agent-spawning.md"
-    domain: "agent-framework"
-    summary: "Gemini 3.1 pattern where agent definitions are generated from high-level capability descriptions"
+- created_at: '2026-02-28'
+  domain: agent-framework
+  file: IDEA-001-meta-agent-spawning.md
+  id: IDEA-001
+  status: parked
+  summary: Gemini 3.1 pattern where agent definitions are generated from high-level
+    capability descriptions
+  title: Meta-agent definition pattern
+  updated_at: '2026-03-01'
+last_updated: '2026-03-02'
+version: '1.0'
