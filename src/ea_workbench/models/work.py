@@ -56,3 +56,24 @@ class SessionRecord(BaseModel):
     artefacts_produced: dict[str, int] = {}
     staged_references: list[str] = []
     topics_discussed: list[str] = []
+    # Option C enriched fields
+    topics: list[str] = []
+    architectural_themes: list[str] = []
+    decisions_made: list[str] = []
+    decisions_deferred: list[str] = []
+    elements_discussed: list[str] = []   # element IDs referenced in session
+    domain_ids: list[str] = []
+    semantic_summary: str = ""            # Optimised for vector search
+
+
+class StagingItem(BaseModel):
+    """A single entity staged for review and routing to a concern table (Option C)."""
+
+    id: str
+    entity_type: str             # motivation|strategy|business_architecture|solution_architecture|implementation
+    entity_data: dict            # JSON blob of the Pydantic model fields
+    target_table: str            # Destination concern table name
+    source_type: str = "chat"    # chat|batch-agent
+    source_id: str = ""          # Session ID or agent run ID
+    confidence: float = 0.8
+    status: str = "staged"       # staged|approved|rejected|deferred

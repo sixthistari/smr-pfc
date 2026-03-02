@@ -1,6 +1,46 @@
 """Pydantic models for the ArchiMate Motivation layer — needs, requirements, engagements."""
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+
+class MotivationElement(BaseModel):
+    """Unified ArchiMate Motivation layer element for the Option C schema.
+
+    Replaces the separate Driver/Outcome/Need/Requirement models in the database.
+    The ``archimate_type`` field determines which subtype-specific fields are relevant.
+    """
+
+    id: str
+    name: str
+    archimate_type: str          # stakeholder|driver|assessment|goal|outcome|requirement|constraint
+    domain_id: str = ""
+    status: str = "draft"
+    description: str = ""
+    confidence: float = 0.8
+    # Stakeholder fields
+    role: str = ""
+    influence_level: str = ""
+    # Driver fields
+    driver_category: str = ""    # internal|external|regulatory
+    # Assessment fields
+    evidence: str = ""
+    impact: str = ""
+    # Goal / outcome fields
+    horizon: str = ""            # H1|H2|H3
+    # Requirement fields
+    requirement_type: str = ""   # business|solution|nonfunctional
+    category: str = ""
+    threshold: str = ""
+    target: str = ""
+    acceptance_criteria: dict = Field(default_factory=dict)
+    solution_id: str = ""
+    engagement_ref: str = ""
+
+
+# ---------------------------------------------------------------------------
+# Legacy classes — kept for backward compatibility with existing code/tests.
+# New code should use MotivationElement with the appropriate archimate_type.
+# ---------------------------------------------------------------------------
 
 
 class Driver(BaseModel):

@@ -10,7 +10,7 @@ def _utcnow() -> str:
 
 
 class Element(BaseModel):
-    """An architectural element in the element registry."""
+    """An architectural element in the element registry (legacy generic model)."""
 
     id: str
     name: str
@@ -27,22 +27,31 @@ class Element(BaseModel):
 
 
 class Relationship(BaseModel):
-    """A relationship between two architectural elements."""
+    """A cross-table relationship between two architectural elements (Option C schema)."""
 
     id: str
-    source_element_id: str
-    target_element_id: str
+    source_table: str = ""       # Name of the source concern table
+    source_id: str = ""          # ID of the source element
+    target_table: str = ""       # Name of the target concern table
+    target_id: str = ""          # ID of the target element
     archimate_type: str
-    description: str | None = None
-    source_spec: str | None = None
-    evidence: str | None = None
+    description: str = ""
+    evidence: str = ""
     confidence: float = 1.0
     created_at: str = Field(default_factory=_utcnow)
-    created_by: str | None = None
+    created_by: str = ""
+
+
+class ValidRelationship(BaseModel):
+    """A permitted ArchiMate metamodel relationship pair (seed data for valid_relationships table)."""
+
+    source_archimate_type: str
+    target_archimate_type: str
+    relationship_type: str
 
 
 class Capability(BaseModel):
-    """A business capability in the capability hierarchy."""
+    """A business capability in the capability hierarchy (legacy model)."""
 
     id: str
     name: str
@@ -54,7 +63,7 @@ class Capability(BaseModel):
 
 
 class ElementCapability(BaseModel):
-    """Link between an element and a capability it realises."""
+    """Link between an element and a capability it realises (legacy model)."""
 
     element_id: str
     capability_id: str
