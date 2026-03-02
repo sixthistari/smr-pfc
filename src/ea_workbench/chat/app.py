@@ -56,7 +56,12 @@ def _load_system_prompt() -> str:
 
 @cl.on_chat_start
 async def on_chat_start() -> None:
-    """Initialise a new chat session with system prompt and empty history."""
+    """Initialise a new chat session with system prompt and empty history.
+
+    Supports DevOps context bootstrap via URL query parameters:
+      - chainlit_init_type: "devops-item" to pre-load a work item context
+      - chainlit_init_id: The work item ID (numeric string)
+    """
     system_prompt = _load_system_prompt()
     cl.user_session.set("system_prompt", system_prompt)
     cl.user_session.set("message_history", [])
@@ -70,6 +75,16 @@ async def on_chat_start() -> None:
             "Type a message to start, or `/help` for slash commands."
         )
     ).send()
+
+    # Check for DevOps context bootstrap via URL query params
+    init_type = cl.user_session.get("chainlit_init_type")
+    init_id = cl.user_session.get("chainlit_init_id")
+    if init_type == "devops-item" and init_id:
+        from ea_workbench.chat.context_bootstrap import bootstrap_from_devops
+
+        ctx = await bootstrap_from_devops(str(init_id))
+        cl.user_session.set("intent", ctx["intent"])
+        await cl.Message(content=ctx["context_message"]).send()
 
 
 @cl.on_message

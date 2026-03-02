@@ -33,10 +33,10 @@ __all__ = [
     "ValidatedStagedRelationship",
 ]
 
-# Valid ArchiMate 3.2 element types — from REQUIREMENTS.md §7.3
+# Valid ArchiMate 3.2 element types — union of all Option C concern tables + standard ArchiMate types
 VALID_ARCHIMATE_ELEMENT_TYPES: frozenset[str] = frozenset(
     {
-        # Motivation layer
+        # Motivation layer (Option C: motivation table)
         "stakeholder",
         "driver",
         "assessment",
@@ -47,30 +47,47 @@ VALID_ARCHIMATE_ELEMENT_TYPES: frozenset[str] = frozenset(
         "constraint",
         "meaning",
         "value",
-        # Strategy layer
+        # Strategy layer (Option C: strategy table)
         "resource",
         "capability",
         "value-stream",
         "course-of-action",
-        # Business layer
+        # Business Architecture layer (Option C: business_architecture table)
         "business-actor",
+        "role",
         "business-role",
+        "process",
         "business-process",
+        "function",
         "business-function",
+        "service",
         "business-service",
+        "object",
         "business-object",
+        "event",
         "business-event",
-        # Application layer
+        # Solution / Application layer (Option C: solution_architecture table)
         "application-component",
         "application-service",
         "application-interface",
+        "application-function",
+        "application-event",
+        "application-process",
         "data-object",
-        # Technology layer
+        # Technology layer (Option C: solution_architecture table)
+        "node",
         "technology-node",
         "technology-service",
         "technology-interface",
+        "technology-function",
         "system-software",
         "artifact",
+        # Implementation & Migration layer (Option C: implementation table)
+        "work-package",
+        "deliverable",
+        "implementation-event",
+        "plateau",
+        "gap",
     }
 )
 

@@ -35,6 +35,14 @@ async def handle_command(content: str, workspace: str) -> None:
         await _cmd_triage(workspace)
     elif command == "/wrap":
         await _cmd_wrap(workspace)
+    elif command == "/capture":
+        await _cmd_capture(parts[1:], workspace)
+    elif command == "/capabilities":
+        await _cmd_capabilities(workspace)
+    elif command == "/analytics":
+        await _cmd_analytics(workspace)
+    elif command == "/migrate":
+        await _cmd_migrate(workspace)
     elif command == "/help":
         await _cmd_help()
     else:
@@ -192,39 +200,99 @@ async def _cmd_health(workspace: str) -> None:
 
 
 async def _cmd_triage(workspace: str) -> None:
-    """Present staged work items for review."""
-    work_dir = os.path.join(workspace, ".staging", "work")
-
-    if not os.path.exists(work_dir):
-        await cl.Message(content="No staged work items found.").send()
-        return
+    """Present staged entity files for approve/reject review."""
+    entities_dir = os.path.join(workspace, ".staging", "entities")
 
     import yaml
 
-    work_files = sorted(f for f in os.listdir(work_dir) if f.endswith(".yaml"))
-    if not work_files:
-        await cl.Message(content="No staged work items pending triage.").send()
+    if not os.path.exists(entities_dir):
+        await cl.Message(content="No staged entity files found.").send()
         return
 
-    lines = [f"**Triage Queue** — {len(work_files)} file(s)\n"]
-    for fname in work_files:
-        try:
-            with open(os.path.join(work_dir, fname), encoding="utf-8") as fh:
-                data = yaml.safe_load(fh)
-            items = data.get("items", [])
-            lines.append(f"**{fname}** ({len(items)} item(s)):")
-            for item in items:
-                lines.append(
-                    f"  - [{item.get('type', '?').upper()}] **{item.get('title', '?')}** "
-                    f"({item.get('priority', '')})"
-                )
-        except Exception as exc:
-            logger.warning("Could not read work file %s: %s", fname, exc)
+    entity_files = sorted(f for f in os.listdir(entities_dir) if f.endswith(".yaml"))
+    if not entity_files:
+        await cl.Message(content="No staged entities pending triage.").send()
+        return
 
-    lines.append(
-        "\n_To push items to DevOps, connect ADO MCP and use the approve workflow._"
-    )
-    await cl.Message(content="\n".join(lines)).send()
+    db_path = os.path.join(workspace, "registry.db")
+
+    for fname in entity_files:
+        full_path = os.path.join(entities_dir, fname)
+        try:
+            with open(full_path, encoding="utf-8") as fh:
+                data = yaml.safe_load(fh)
+            entities = data.get("entities", []) if isinstance(data, dict) else []
+            entity_names = [e.get("name", "?") for e in entities if isinstance(e, dict)]
+            summary = ", ".join(entity_names[:3])
+            if len(entity_names) > 3:
+                summary += f" +{len(entity_names) - 3} more"
+        except Exception as exc:
+            logger.warning("Could not read staging file %s: %s", fname, exc)
+            summary = "(unreadable)"
+
+        actions = [
+            cl.Action(
+                name="approve_staging",
+                value=f"{full_path}||{workspace}||{db_path}",
+                label="Approve",
+                description=f"Approve and upsert {fname} to registry",
+            ),
+            cl.Action(
+                name="reject_staging",
+                value=full_path,
+                label="Reject",
+                description=f"Reject and delete {fname}",
+            ),
+        ]
+        await cl.Message(
+            content=f"**{fname}**\n{summary}",
+            actions=actions,
+        ).send()
+
+
+@cl.action_callback("approve_staging")
+async def on_approve_staging(action: cl.Action) -> None:
+    """Handle approval of a staging file — upserts to registry."""
+    parts = action.value.split("||")
+    if len(parts) != 3:
+        await cl.Message(content="⚠️ Malformed action value — cannot approve.").send()
+        return
+    staging_file, workspace, db_path = parts
+
+    from ea_workbench.extraction.review import approve_to_registry, list_pending
+
+    try:
+        count = await approve_to_registry(staging_file, workspace, db_path)
+        await cl.Message(content=f"✅ Approved: `{os.path.basename(staging_file)}` — {count} element(s) added to registry.").send()
+    except Exception as exc:
+        logger.error("Approve action failed: %s", exc)
+        await cl.Message(content=f"⚠️ Approval failed: {exc}").send()
+        return
+
+    counts = await list_pending(workspace)
+    total = sum(counts.values())
+    await cl.Message(content=f"_Staging queue: {total} file(s) remaining._").send()
+
+
+@cl.action_callback("reject_staging")
+async def on_reject_staging(action: cl.Action) -> None:
+    """Handle rejection of a staging file — deletes it."""
+    staging_file = action.value
+
+    from ea_workbench.extraction.review import list_pending, reject_staged_entities
+
+    try:
+        await reject_staged_entities(staging_file)
+        await cl.Message(content=f"🗑️ Rejected: `{os.path.basename(staging_file)}` deleted.").send()
+    except Exception as exc:
+        logger.error("Reject action failed: %s", exc)
+        await cl.Message(content=f"⚠️ Rejection failed: {exc}").send()
+        return
+
+    workspace = os.path.dirname(os.path.dirname(os.path.dirname(staging_file)))
+    counts = await list_pending(workspace)
+    total = sum(counts.values())
+    await cl.Message(content=f"_Staging queue: {total} file(s) remaining._").send()
 
 
 async def _cmd_wrap(workspace: str) -> None:
@@ -278,6 +346,170 @@ async def _cmd_wrap(workspace: str) -> None:
     ).send()
 
 
+async def _cmd_capture(args: list[str], workspace: str) -> None:
+    """Scaffold a motivation layer record for user confirmation.
+
+    Usage: /capture <type> <domain>
+      type: need | requirement | engagement
+      domain: e.g. safety, enterprise, technology
+    """
+    import uuid as _uuid
+    from datetime import UTC as _UTC
+    from datetime import datetime as _datetime
+
+    if len(args) < 2:
+        await cl.Message(
+            content=(
+                "Usage: `/capture <type> <domain>`\n\n"
+                "Types: `need`, `requirement`, `engagement`\n"
+                "Example: `/capture need safety`"
+            )
+        ).send()
+        return
+
+    record_type = args[0].lower()
+    domain = args[1].lower()
+    valid_types = {"need", "requirement", "engagement"}
+
+    if record_type not in valid_types:
+        await cl.Message(
+            content=f"Unknown capture type: `{record_type}`. Valid types: {', '.join(sorted(valid_types))}"
+        ).send()
+        return
+
+    record_id = f"{record_type[:3]}-{str(_uuid.uuid4())[:8]}"
+    now = _datetime.now(_UTC).strftime("%Y-%m-%d")
+
+    if record_type == "need":
+        scaffold = (
+            f"```yaml\n"
+            f"id: {record_id}\n"
+            f"domain: {domain}\n"
+            f"statement: \"<Describe the stakeholder need here>\"\n"
+            f"stakeholders:\n"
+            f"  - \"<stakeholder name>\"\n"
+            f"drivers: []\n"
+            f"outcomes: []\n"
+            f"priority: medium\n"
+            f"requirements_derived: []\n"
+            f"```"
+        )
+    elif record_type == "requirement":
+        scaffold = (
+            f"```yaml\n"
+            f"id: {record_id}\n"
+            f"domain: {domain}\n"
+            f"traces_to_need: \"<need-id>\"\n"
+            f"statement: \"<Describe the requirement here>\"\n"
+            f"type: functional\n"
+            f"acceptance_criteria:\n"
+            f"  - \"<Criterion 1>\"\n"
+            f"realised_by: []\n"
+            f"```"
+        )
+    else:  # engagement
+        scaffold = (
+            f"```yaml\n"
+            f"id: {record_id}\n"
+            f"title: \"<Engagement title>\"\n"
+            f"date: \"{now}\"\n"
+            f"type: workshop\n"
+            f"participants:\n"
+            f"  - name: \"<Participant Name>\"\n"
+            f"    role: \"<role>\"\n"
+            f"context: \"<Brief context of the session>\"\n"
+            f"needs_identified: []\n"
+            f"```"
+        )
+
+    async with cl.Step(name=f"Capture {record_type.capitalize()}") as step:
+        step.input = f"Type: `{record_type}` | Domain: `{domain}`"
+        step.output = f"Scaffold generated — fill in the details below and confirm."
+
+    await cl.Message(
+        content=(
+            f"**{record_type.capitalize()} scaffold** for domain `{domain}`:\n\n"
+            f"{scaffold}\n\n"
+            f"_Edit the YAML above, then paste it back with `/capture confirm <yaml>` to save._"
+        )
+    ).send()
+
+
+async def _cmd_capabilities(workspace: str) -> None:
+    """Show capability model summary — domain count, capability count, max depth."""
+    from ea_workbench.utils.capability_bootstrap import validate_capability_model
+
+    try:
+        summary = validate_capability_model(workspace)
+    except Exception as exc:
+        await cl.Message(content=f"⚠️ Could not load capability model: {exc}").send()
+        return
+
+    status_icon = "✅" if summary.get("is_valid") else "⚠️"
+    lines = [
+        f"**Capability Model** {status_icon}",
+        "",
+        f"- Domains: {summary.get('domain_count', '?')}",
+        f"- Total capabilities: {summary.get('capability_count', '?')}",
+        f"- Max depth: {summary.get('max_depth', '?')}",
+        f"- Valid: {summary.get('is_valid', '?')}",
+    ]
+    await cl.Message(content="\n".join(lines)).send()
+
+
+async def _cmd_analytics(workspace: str) -> None:
+    """Show practice artefact analytics — counts by type, domain coverage, idea→decision rate."""
+    from ea_workbench.utils.practice_analytics import (
+        analyse_practice_artefacts,
+        format_analytics_report,
+    )
+
+    try:
+        analytics = analyse_practice_artefacts(workspace)
+        report = format_analytics_report(analytics)
+    except Exception as exc:
+        await cl.Message(content=f"⚠️ Could not compute analytics: {exc}").send()
+        return
+
+    await cl.Message(content=report).send()
+
+
+async def _cmd_migrate(workspace: str) -> None:
+    """Run the Phase 0 → Option C schema migration."""
+    import os
+
+    db_path = os.path.join(workspace, "registry.db")
+
+    async with cl.Step(name="Schema Migration", show_input=True) as step:
+        step.input = f"Database: `{db_path}`"
+        try:
+            from ea_workbench.registry.migration import migrate_phase0_to_option_c
+
+            result = await migrate_phase0_to_option_c(db_path)
+            step.output = (
+                f"Migrated: {result['migrated']} | "
+                f"Skipped: {result['skipped']} | "
+                f"Errors: {len(result['errors'])}"
+            )
+        except Exception as exc:
+            step.output = f"❌ Migration failed: {exc}"
+            logger.error("Migration failed: %s", exc)
+            return
+
+    lines = [
+        "**Phase 0 → Option C Migration Complete**",
+        "",
+        f"- Elements migrated: {result['migrated']}",
+        f"- Elements skipped (unknown type): {result['skipped']}",
+        f"- Errors: {len(result['errors'])}",
+    ]
+    if result["errors"]:
+        lines.append("\n**Errors:**")
+        for err in result["errors"][:5]:
+            lines.append(f"  - {err}")
+    await cl.Message(content="\n".join(lines)).send()
+
+
 async def _cmd_help() -> None:
     """Show available slash commands."""
     help_text = """**EA Workbench Commands**
@@ -288,7 +520,11 @@ async def _cmd_help() -> None:
 | `/status` | Show recent agent run summaries |
 | `/staging` | Show staging area statistics |
 | `/health` | Show latest wiki integrity results |
-| `/triage` | Review staged work items |
+| `/triage` | Review staged entities (Approve/Reject) |
+| `/capture <type> <domain>` | Scaffold a motivation record (need/requirement/engagement) |
+| `/capabilities` | Show capability model summary |
+| `/analytics` | Show practice artefact counts, domain coverage, idea→decision rate |
+| `/migrate` | Migrate Phase 0 data to Option C schema |
 | `/wrap` | Generate session summary and persist |
 | `/help` | Show this help |
 """
