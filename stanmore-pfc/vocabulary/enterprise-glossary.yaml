@@ -1,0 +1,34 @@
+# Stanmore Resources — Enterprise Glossary
+# Canonical terms with definitions. Agents use this for vocabulary grounding.
+
+version: "1.0"
+last_updated: "2026-03-02"
+
+terms:
+  - term: "SIS Brain"
+    definition: "Stanmore Intelligence System — the overall enterprise AI architecture"
+    domain: "enterprise"
+
+  - term: "PFC"
+    definition: "Pre-Frontal Cortex — the Enterprise Architect's operational workbench"
+    domain: "ea-practice"
+
+  - term: "WoE Semantic Layer"
+    definition: "Web of Everything — the enterprise knowledge graph connecting all domains"
+    domain: "knowledge-infrastructure"
+
+  - term: "Dual-Track Model"
+    definition: "Track 1 (formal, governed) vs Track 2 (informal, exploratory) process classification"
+    domain: "enterprise"
+
+  - term: "Autonomy Level"
+    definition: "L0-L5 scale governing agent decision authority. Track 1 ceiling: L2. Track 2 ceiling: L4."
+    domain: "cognition"
+
+  - term: "Document Authority"
+    definition: "Metadata-driven scoring ensuring retrieval returns current authoritative documents"
+    domain: "knowledge-infrastructure"
+
+  - term: "Medallion Architecture"
+    definition: "Bronze (raw) → Silver (parsed/enriched) → Gold (consumption-ready) data pipeline pattern"
+    domain: "knowledge-infrastructure"

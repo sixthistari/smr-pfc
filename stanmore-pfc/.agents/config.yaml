@@ -1,0 +1,28 @@
+# Stanmore PFC — Agent Registry
+# This file defines all batch agents, their models, prompts, and tools.
+# Adding an agent means adding an entry here — not modifying runner.py.
+
+version: "1.0"
+last_updated: "2026-03-02"
+
+# Default model routing via Azure AI Foundry
+defaults:
+  endpoint: "${AZURE_AI_FOUNDRY_ENDPOINT}"
+  judgment_model: "claude-sonnet-4-5"       # Architectural judgment, assessment, design
+  extraction_model: "gemini-2.5-flash"      # Extraction, classification, structural validation
+  authoring_model: "claude-sonnet-4-5"      # Spec authoring, communication generation
+
+agents:
+  adr-generator:
+    id: "adr-generator"
+    name: "ADR Generator"
+    use_case: "UC-12"
+    description: "Generates Architecture Decision Records from context documents"
+    model: "${defaults.authoring_model}"
+    prompt: ".agents/prompts/adr-generator.md"
+    input_type: "file"                       # file | directory | stdin
+    output_dir: "stanmore-pfc/architecture/decisions/"
+    extracts_entities: true
+
+  # Additional agents added here as they are built.
+  # See REQUIREMENTS.md §5 for the full list of 15 use cases.

@@ -1,0 +1,67 @@
+# Stanmore Resources — Enterprise Capability Model
+# Owner: Justin Hume, Enterprise Architect
+# This is the starting point. Expand as domains are analysed.
+
+version: "1.0"
+last_updated: "2026-03-02"
+
+capabilities:
+  - id: "cap-ai-knowledge"
+    name: "AI & Knowledge Management"
+    level: 0
+    children:
+      - id: "cap-knowledge-layer"
+        name: "Enterprise Knowledge Layer"
+        level: 1
+        domain: "knowledge-infrastructure"
+        children:
+          - id: "cap-doc-ingestion"
+            name: "Document Ingestion & Processing"
+            level: 2
+            maturity: "initial"
+          - id: "cap-vector-retrieval"
+            name: "Vector Retrieval"
+            level: 2
+            maturity: "initial"
+          - id: "cap-graph-reasoning"
+            name: "Graph-Based Reasoning"
+            level: 2
+            maturity: "planned"
+          - id: "cap-doc-authority"
+            name: "Document Authority Management"
+            level: 2
+            maturity: "initial"
+      - id: "cap-agent-runtime"
+        name: "Agent Runtime & Orchestration"
+        level: 1
+        domain: "cognition"
+        children:
+          - id: "cap-domain-agents"
+            name: "Domain-Specific Agents"
+            level: 2
+            maturity: "planned"
+          - id: "cap-agent-governance"
+            name: "Agent Governance & Guardrails"
+            level: 2
+            maturity: "initial"
+          - id: "cap-cross-domain-orchestration"
+            name: "Cross-Domain Orchestration"
+            level: 2
+            maturity: "planned"
+      - id: "cap-ea-workbench"
+        name: "Enterprise Architecture Workbench"
+        level: 1
+        domain: "ea-practice"
+        children:
+          - id: "cap-arch-extraction"
+            name: "Architectural Entity Extraction"
+            level: 2
+            maturity: "initial"
+          - id: "cap-wiki-governance"
+            name: "Wiki Governance & Integrity"
+            level: 2
+            maturity: "planned"
+          - id: "cap-orbus-syndication"
+            name: "Orbus iServer Syndication"
+            level: 2
+            maturity: "planned"

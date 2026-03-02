@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Type checking
+.pyright/
+.mypy_cache/
+
+# uv
+.uv/
+
+# PFC-specific: generated outputs (not source)
+stanmore-pfc/.staging/exports/
+stanmore-pfc/.agents/runs/
+
+# Chainlit
+.chainlit/
+.files/
+chainlit.db

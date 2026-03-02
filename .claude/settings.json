@@ -1,0 +1,46 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit",
+      "MultiEdit",
+      "Read",
+      "Bash(uv sync)",
+      "Bash(uv run pytest*)",
+      "Bash(uv run ruff*)",
+      "Bash(uv run pyright*)",
+      "Bash(uv add*)",
+      "Bash(uv remove*)",
+      "Bash(uv pip*)",
+      "Bash(mkdir*)",
+      "Bash(touch*)",
+      "Bash(cat*)",
+      "Bash(ls*)",
+      "Bash(find*)",
+      "Bash(grep*)",
+      "Bash(head*)",
+      "Bash(tail*)",
+      "Bash(wc*)",
+      "Bash(echo*)",
+      "Bash(cp*)",
+      "Bash(mv*)",
+      "Bash(git status)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(python*)",
+      "Bash(node*)"
+    ],
+    "deny": [
+      "Bash(rm -rf*)",
+      "Bash(git push*)",
+      "Bash(git checkout main)",
+      "Bash(git checkout master)",
+      "Bash(git merge*)",
+      "Bash(git rebase*)",
+      "Bash(curl*)",
+      "Bash(wget*)",
+      "Bash(sudo*)"
+    ]
+  }
+}
