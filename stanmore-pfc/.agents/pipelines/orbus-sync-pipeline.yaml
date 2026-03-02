@@ -1,0 +1,27 @@
+# Orbus Sync Pipeline
+# Trigger: scheduled (weekly, Monday 06:00 AEST)
+# Produces a change set YAML for human review before Orbus update.
+
+name: orbus-sync-pipeline
+version: "1.0"
+description: "Weekly Orbus synchronisation intelligence run"
+trigger: scheduled
+schedule: "0 6 * * MON"  # cron: Monday 06:00 UTC
+
+steps:
+  - id: orbus-sync
+    agent: orbus-sync
+    label: "Orbus Sync Intelligence (UC-9)"
+    input: "${WORKSPACE}"
+    output_dir: output/orbus-sync
+    on_failure: notify
+
+notifications:
+  email: true
+  slack: false
+  format: markdown
+  include_outputs: true
+
+notes: |
+  The change set at output/orbus-sync/changeset-{date}.yaml must be reviewed
+  by the EA team before being applied to Orbus. This pipeline does NOT auto-apply.

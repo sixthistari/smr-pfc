@@ -1,0 +1,44 @@
+work_items:
+  - id: WI-001
+    title: "Safety Case Repository — Core API"
+    type: feature
+    status: in_progress
+    domain: Safety Management
+    capabilities_needed:
+      - Safety Case Lifecycle Management
+      - Data Governance
+    effort_points: 13
+    quarter: Q1-2026
+
+  - id: WI-002
+    title: "Hazard Register Integration"
+    type: feature
+    status: planned
+    domain: Safety Management
+    capabilities_needed:
+      - Integration Management
+      - Safety Case Lifecycle Management
+    effort_points: 8
+    quarter: Q2-2026
+
+  - id: WI-003
+    title: "Safety Events Notification Service"
+    type: feature
+    status: planned
+    domain: Safety Management
+    capabilities_needed:
+      - Event-Driven Architecture
+      - Messaging Infrastructure
+    effort_points: 5
+    quarter: Q2-2026
+
+  - id: WI-004
+    title: "Automated Safety Audit Reports"
+    type: ai-feature
+    status: proposed
+    domain: AI and Analytics
+    capabilities_needed:
+      - AI Document Generation
+      - Safety Case Lifecycle Management
+    effort_points: 21
+    quarter: Q3-2026

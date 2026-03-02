@@ -1,0 +1,31 @@
+Meeting: Enterprise Architecture Review — Safety Management Platform
+Date: 2026-02-15
+Attendees: Rachel (EA Lead), Tom (Solution Architect), Priya (Business Analyst), Marcus (Engineering Lead)
+
+Rachel: Let's start with the Safety Management Platform initiative. Tom, can you walk us through what's been decided?
+
+Tom: Sure. The core of the solution is a new Safety Case Repository service — it will store all safety cases, linking them back to the relevant hazard register entries. We're building this as a REST API backed by a PostgreSQL database.
+
+Priya: From the business side, we need to make sure the Hazard Assessment Process is captured. Currently it's completely manual — the risk managers fill out spreadsheets. The new system needs to integrate with that workflow.
+
+Marcus: We're planning to expose a Safety Events Notification Service — that's a separate microservice responsible for publishing events whenever a safety case changes status. It'll use an async message queue, probably Azure Service Bus.
+
+Rachel: Good. How does this connect to the existing Incident Reporting System? That's already in the registry.
+
+Tom: The Safety Case Repository will have a data integration with the Incident Reporting System. We'll map incident records to safety cases — a one-to-many relationship. The integration will be near real-time via the message queue.
+
+Priya: I want to flag a new business capability here — Safety Case Lifecycle Management. That's currently not in our capability model. It spans three business processes: initiation, review, and closure of safety cases.
+
+Rachel: Good catch. We'll need to add that to the capability backlog. Don't create it now — flag it as unknown.
+
+Marcus: The Risk Manager role will be the primary user of this platform. They'll access it via a web portal. There's also an Audit Officer role that needs read-only access to closed safety cases.
+
+Tom: For infrastructure, we're running on Azure Kubernetes Service. Each microservice runs as a separate container. The Safety Case Repository will need a persistent volume for attachments.
+
+Rachel: What about the data model? Any new data objects we should register?
+
+Priya: Yes — Safety Case Record and Hazard Register Entry are the two key data objects. Both need to be in the element registry.
+
+Marcus: And don't forget Safety Event — that's the event payload published by the notification service.
+
+Rachel: Alright. Action items: Tom to draft the solution spec, Marcus to define the service contracts, Priya to document the business process flows. We'll review next fortnight.

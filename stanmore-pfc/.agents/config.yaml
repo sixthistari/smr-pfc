@@ -25,5 +25,181 @@ agents:
     extracts_entities: true
     extracts_relationships: false
 
-  # Additional agents added here as they are built.
-  # See REQUIREMENTS.md §5 for the full list of 15 use cases.
+  wiki-integrity:
+    id: "wiki-integrity"
+    name: "Wiki Structure Integrity Agent"
+    use_case: "UC-13"
+    description: "Scans specs/ for structural violations and produces a health report"
+    model: "${defaults.extraction_model}"
+    prompt: ".agents/prompts/wiki-integrity.md"
+    input_type: "workspace"
+    output_dir: ".agents/runs"
+    extracts_entities: false
+    tools: ["Read"]
+    schedule: "weekly"
+
+  guardrail:
+    id: "guardrail"
+    name: "Design-Time Guardrail Agent"
+    use_case: "UC-7"
+    description: "Checks a changed spec/wiki page against principles, standards, and NFRs"
+    model: "${defaults.judgment_model}"
+    prompt: ".agents/prompts/guardrail.md"
+    input_type: "file"
+    output_dir: ".staging/work"
+    extracts_entities: false
+    tools: ["Read"]
+
+  spec-decomposition:
+    id: "spec-decomposition"
+    name: "Spec Decomposition Agent"
+    use_case: "UC-6"
+    description: "Decomposes a parent spec into draft child pages with entity staging"
+    model: "${defaults.authoring_model}"
+    prompt: ".agents/prompts/spec-decomposition.md"
+    input_type: "file"
+    output_dir: "specs/tier2"
+    extracts_entities: true
+    tools: ["Read", "Write"]
+
+  transcript-classifier:
+    id: "transcript-classifier"
+    name: "Transcript → ArchiMate Classifier"
+    use_case: "UC-1"
+    model: "${defaults.extraction_model}"
+    prompt: ".agents/prompts/transcript-classifier.md"
+    input_type: "file"
+    output_dir: ".staging/entities"
+    extracts_entities: true
+    extracts_relationships: true
+    tools: ["Read", "Write"]
+
+  weekly-summary:
+    id: "weekly-summary"
+    name: "Weekly Summary Agent"
+    model: "${defaults.authoring_model}"
+    prompt: ".agents/prompts/weekly-summary.md"
+    input_type: "workspace"
+    output_dir: "output/weekly-summaries"
+    extracts_entities: false
+    tools: ["Read", "Write"]
+    schedule: "weekly"
+
+  use-case-assessment:
+    id: "use-case-assessment"
+    name: "Use-Case Assessment Agent"
+    use_case: "UC-2"
+    model: "${defaults.judgment_model}"
+    prompt: ".agents/prompts/use-case-assessment.md"
+    input_type: "file"
+    output_dir: "output/assessments"
+    extracts_entities: false
+    tools: ["Read", "Write"]
+
+  capability-intelligence:
+    id: "capability-intelligence"
+    name: "Capability Intelligence Agent"
+    use_case: "UC-4"
+    model: "${defaults.judgment_model}"
+    prompt: ".agents/prompts/capability-intelligence.md"
+    input_type: "file"
+    output_dir: "output/intelligence"
+    extracts_entities: false
+    tools: ["Read", "Write"]
+    schedule: "fortnightly"
+
+  multi-format-export:
+    id: "multi-format-export"
+    name: "Multi-Format Architecture Export"
+    use_case: "UC-14"
+    model: "${defaults.authoring_model}"
+    prompt: ".agents/prompts/multi-format-export.md"
+    input_type: "file"
+    output_dir: "output/exports"
+    extracts_entities: false
+    tools: ["Read", "Write"]
+
+  stakeholder-comms:
+    id: "stakeholder-comms"
+    name: "Stakeholder Communication Generator"
+    use_case: "UC-5"
+    model: "${defaults.authoring_model}"
+    prompt: ".agents/prompts/stakeholder-comms.md"
+    input_type: "file"
+    output_dir: "output/communications"
+    extracts_entities: false
+    tools: ["Read", "Write"]
+
+  domain-knowledge-spec:
+    id: "domain-knowledge-spec"
+    name: "Domain Knowledge Spec Drafter"
+    use_case: "UC-11"
+    model: "${defaults.authoring_model}"
+    prompt: ".agents/prompts/domain-knowledge-spec.md"
+    input_type: "file"
+    output_dir: "output/specs"
+    extracts_entities: false
+    tools: ["Read", "Write"]
+
+  nfr-compliance:
+    id: "nfr-compliance"
+    name: "NFR Compliance Report Generator"
+    use_case: "UC-10"
+    model: "${defaults.extraction_model}"
+    prompt: ".agents/prompts/nfr-compliance.md"
+    input_type: "file"
+    output_dir: "output/compliance"
+    extracts_entities: false
+    tools: ["Read", "Write"]
+    schedule: "monthly"
+
+  architecture-review:
+    id: "architecture-review"
+    name: "Architecture Review Gate Agent"
+    use_case: "UC-3"
+    model: "${defaults.judgment_model}"
+    prompt: ".agents/prompts/architecture-review.md"
+    input_type: "file"
+    output_dir: "output/reviews"
+    extracts_entities: false
+    tools: ["Read", "Write"]
+    trigger: "pr-created"
+    pipeline: ".agents/pipelines/architecture-review-pipeline.yaml"
+
+  spec-code-alignment:
+    id: "spec-code-alignment"
+    name: "Spec-to-Code Alignment Checker"
+    use_case: "UC-8"
+    model: "${defaults.judgment_model}"
+    prompt: ".agents/prompts/spec-code-alignment.md"
+    input_type: "file"
+    output_dir: "output/reviews"
+    extracts_entities: false
+    tools: ["Read", "Write"]
+    trigger: "pr-created"
+
+  orbus-sync:
+    id: "orbus-sync"
+    name: "Orbus Sync Intelligence Agent"
+    use_case: "UC-9"
+    model: "${defaults.judgment_model}"
+    prompt: ".agents/prompts/orbus-sync.md"
+    input_type: "workspace"
+    output_dir: "output/orbus-sync"
+    extracts_entities: false
+    tools: ["Read", "Write"]
+    schedule: "weekly"
+    pipeline: ".agents/pipelines/orbus-sync-pipeline.yaml"
+
+  standards-enforcer:
+    id: "standards-enforcer"
+    name: "Standards & Patterns Register Enforcer"
+    use_case: "UC-15"
+    model: "${defaults.judgment_model}"
+    prompt: ".agents/prompts/standards-enforcer.md"
+    input_type: "file"
+    output_dir: "output/reviews"
+    extracts_entities: false
+    tools: ["Read", "Write"]
+    trigger: "wiki-commit"
+    pipeline: ".agents/pipelines/standards-enforcer-pipeline.yaml"

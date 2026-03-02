@@ -1,0 +1,28 @@
+# Architecture Review Pipeline
+# Trigger: pr-created event (ADO pipeline or webhook)
+# Runs UC-3 and UC-8 in parallel when a PR is raised.
+
+name: architecture-review-pipeline
+version: "1.0"
+description: "Runs architecture review gate and spec-code alignment check on PR creation"
+trigger: pr-created
+
+steps:
+  - id: architecture-review
+    agent: architecture-review
+    label: "Architecture Review Gate (UC-3)"
+    input: "${PR_DIFF_PATH}"
+    output_dir: output/reviews
+    on_failure: continue  # Advisory only — never blocks
+
+  - id: spec-code-alignment
+    agent: spec-code-alignment
+    label: "Spec-to-Code Alignment Check (UC-8)"
+    input: "${PR_DIFF_PATH}::${SPEC_FILE_PATH}"
+    output_dir: output/reviews
+    on_failure: continue  # Advisory only — never blocks
+
+notifications:
+  pr_comment: true
+  format: markdown
+  include_outputs: true

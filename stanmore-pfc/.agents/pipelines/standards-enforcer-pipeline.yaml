@@ -1,0 +1,26 @@
+# Standards Enforcer Pipeline
+# Trigger: wiki-commit event (alongside UC-7 guardrail pipeline)
+# Checks new/changed spec against Standards Register and produces applicability report.
+
+name: standards-enforcer-pipeline
+version: "1.0"
+description: "Standards & patterns applicability check on wiki spec commit"
+trigger: wiki-commit
+
+steps:
+  - id: standards-enforcer
+    agent: standards-enforcer
+    label: "Standards & Patterns Enforcer (UC-15)"
+    input: "${CHANGED_SPEC_PATH}"
+    output_dir: output/reviews
+    on_failure: continue  # Advisory only
+
+notifications:
+  wiki_comment: true
+  format: markdown
+  include_outputs: true
+
+notes: |
+  This pipeline runs alongside the guardrail pipeline (UC-7) on wiki commits.
+  Both are advisory — they flag issues but do not block the commit.
+  The architect decides whether to act on findings before the spec is approved.
