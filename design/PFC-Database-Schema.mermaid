@@ -1,0 +1,365 @@
+erDiagram
+    %% ═══════════════════════════════════════
+    %% Cross-Cutting: Domains
+    %% ═══════════════════════════════════════
+
+    domains {
+        text id PK "dom-safety dom-geology etc"
+        text name
+        text description
+        int priority
+        text maturity "initial | defined | managed | optimised"
+        text autonomy_ceiling "L0-L5 max for domain"
+        text track_default "Track1 | Track2"
+        text spec_coverage
+        text owner_role
+    }
+
+    %% ═══════════════════════════════════════
+    %% Motivation Layer
+    %% ═══════════════════════════════════════
+
+    motivation {
+        text id PK "STKH DRV ASSESS GOAL BREQ SREQ"
+        text name
+        text archimate_type "stakeholder driver assessment goal outcome requirement constraint"
+        text domain_id FK
+        text status
+        text description
+        real confidence
+        text role "stakeholder"
+        text influence_level "stakeholder"
+        text driver_category "internal external regulatory"
+        text evidence "assessment"
+        text impact "assessment"
+        text horizon "goal H1 H2 H3"
+        text requirement_type "business solution nonfunctional"
+        text category "requirement"
+        text threshold "requirement"
+        text target "requirement"
+        text acceptance_criteria "JSON"
+        text solution_id "solution reqs only"
+        text engagement_ref FK
+    }
+
+    %% ═══════════════════════════════════════
+    %% Strategy Layer
+    %% ═══════════════════════════════════════
+
+    strategy {
+        text id PK "CAP VS RES COA"
+        text name
+        text archimate_type "capability value-stream resource course-of-action"
+        text domain_id FK
+        text status
+        text description
+        real confidence
+        text parent_id FK "capability self-ref"
+        int level "capability depth"
+        text maturity "capability"
+        text stages "value-stream JSON"
+        text value_proposition "value-stream"
+        text horizon "course-of-action"
+        text traces_to_goal "FK motivation"
+    }
+
+    %% ═══════════════════════════════════════
+    %% Business Architecture Layer
+    %% ═══════════════════════════════════════
+
+    business_architecture {
+        text id PK "BA BR BF BP BS BO"
+        text name
+        text archimate_type "business-actor role process function service object event"
+        text domain_id FK
+        text status
+        text description
+        real confidence
+        text parent_id FK "hierarchy self-ref"
+        text actor_type "person team org-unit agent"
+        int agent_augmented "role 0 or 1"
+        text augmentation_level "role L0-L5"
+        text track "process Track1 Track2"
+        text governance_level "process"
+        text trigger_event "process"
+        text process_owner_id "FK to role"
+        text service_type "internal external"
+        int has_authority_scoring "object 0 or 1"
+    }
+
+    process_steps {
+        text id PK
+        text process_id FK "business_architecture"
+        int sequence
+        text name
+        text step_type "human agent system decision gateway"
+        text role_id "FK business-role"
+        text agent_id "FK solution_architecture"
+        text agent_autonomy "L0-L5"
+        text description
+        text input_objects "JSON"
+        text output_objects "JSON"
+        int approval_required "0 or 1"
+        int track_crossing "0 or 1"
+    }
+
+    %% ═══════════════════════════════════════
+    %% Solution Architecture Layer
+    %% ═══════════════════════════════════════
+
+    solution_architecture {
+        text id PK "comp- tech- etc"
+        text name
+        text archimate_type "application-component service data-object node technology-service artifact etc"
+        text domain_id FK
+        text status
+        text description
+        real confidence
+        text version "app component"
+        text deployment_status "planned dev staging production"
+        int is_agent "0 or 1"
+        text default_autonomy "agent L0-L5"
+        text default_track "agent Track1 Track2"
+        text knowledge_base_ref "agent"
+        int promoted_to_actor "agent graduated"
+        int is_knowledge_store "0 or 1"
+        text store_type "vector graph document hybrid"
+        text config_path "repo path"
+        text fallback_ref "FK fallback store"
+        text ingestion_pipeline_ref "FK pipeline element"
+        text platform "technology"
+        text environment "technology"
+        text provider "Azure on-prem hybrid"
+        text region "technology"
+        text ga_status "ga preview deprecated retired"
+    }
+
+    %% ═══════════════════════════════════════
+    %% Implementation Layer
+    %% ═══════════════════════════════════════
+
+    implementation {
+        text id PK "WP DEL PLT GAP"
+        text name
+        text archimate_type "work-package deliverable implementation-event plateau gap"
+        text domain_id FK
+        text status
+        text description
+        text solution_id FK
+        text phase "Phase 0 1 2 etc"
+        text target_date "work-package"
+        text plateau_description "plateau"
+    }
+
+    %% ═══════════════════════════════════════
+    %% Relationships with Metamodel Validation
+    %% ═══════════════════════════════════════
+
+    relationships {
+        text id PK
+        text source_table
+        text source_id FK
+        text target_table
+        text target_id FK
+        text archimate_type "relationship type"
+        text description
+        text evidence
+        real confidence
+        text created_by
+    }
+
+    valid_relationships {
+        text source_archimate_type PK
+        text target_archimate_type PK
+        text relationship_type PK
+    }
+
+    %% ═══════════════════════════════════════
+    %% Portfolio
+    %% ═══════════════════════════════════════
+
+    solutions {
+        text id PK "sol-safety-knowledge"
+        text name
+        text description
+        text domain_id FK
+        text solution_type "agent-service platform integration"
+        text status "proposed in-build deployed retired"
+        text portfolio_product
+        text business_service_id "FK business_architecture"
+        text owner
+    }
+
+    solution_components {
+        text solution_id FK
+        text element_id FK "solution_architecture"
+        text role_in_solution
+    }
+
+    solution_diagrams {
+        text id PK
+        text solution_id FK
+        text diagram_type "component sequence deployment class"
+        text title
+        text file_path
+        text notation "UML ArchiMate custom"
+    }
+
+    deployment_targets {
+        text id PK "dt-prod-aue"
+        text name
+        text environment "dev test staging prod"
+        text region
+        text subscription
+    }
+
+    solution_deployments {
+        text solution_id FK
+        text target_id FK
+        text iac_path "Bicep path"
+        text status "planned provisioned active decommissioned"
+    }
+
+    %% ═══════════════════════════════════════
+    %% EA Practice
+    %% ═══════════════════════════════════════
+
+    practice_artefacts {
+        text id PK "PRI ADR STD NFR IDEA"
+        text title
+        text type "principle standard decision nfr idea strategy"
+        text archimate_type "nullable"
+        text status
+        text domain_id FK
+        text file_path
+        text summary
+        text supersedes "self-ref"
+    }
+
+    engagements {
+        text id PK "ENG-001"
+        text title
+        text date
+        text type "workshop interview review observation"
+        text context
+        text session_id
+        text conversation_summary
+    }
+
+    %% ═══════════════════════════════════════
+    %% Governance Controls (Supporting Structure)
+    %% ═══════════════════════════════════════
+
+    governance_controls {
+        text id PK "ctrl-tcp-bp-incident"
+        text name
+        text description
+        text target_table "CHECK bus_arch sol_arch process_steps strategy motivation implementation"
+        text target_id FK "governed element"
+        text standard_id FK "practice_artefacts"
+        text constraint_id "optional FK motivation constraint"
+        text enforcement_type "automated manual-audit self-assessment approval-gate"
+        text enforcement_mechanism
+        text assessment_frequency "continuous daily weekly monthly quarterly annual"
+        text last_assessed
+        text compliance_status "compliant non-compliant partially-compliant not-assessed exempt"
+        text scope "enterprise domain process step"
+        text domain_id FK
+    }
+
+    %% ═══════════════════════════════════════
+    %% Provenance
+    %% ═══════════════════════════════════════
+
+    staging_items {
+        text id PK
+        text entity_type
+        text entity_data "JSON"
+        text target_table "destination concern table"
+        text source_type "chat batch-agent"
+        text source_id
+        real confidence
+        text status "staged approved rejected deferred"
+    }
+
+    quality_evaluations {
+        text id PK "eval-safety-retrieval-baseline"
+        text name
+        text target_table "CHECK sol_arch solutions process_steps bus_arch strategy"
+        text target_id FK "evaluated element"
+        text domain_id FK
+        text evaluation_type "retrieval generation end-to-end latency cost"
+        text phase "Phase 0 1 2 etc"
+        text baseline_ref "FK prior evaluation"
+        text methodology "ref to test protocol"
+        text metrics "JSON - precision_at_5 latency_p50 etc"
+        text pass_fail "pass fail inconclusive"
+        text summary
+        text decision_ref "FK practice_artefacts ADR"
+        text evaluated_by
+        text evaluated_at
+    }
+
+    agent_runs {
+        text run_id PK
+        text agent_id
+        text status "running completed failed"
+        int entities_extracted
+        int duration_ms
+        int tokens_used
+        text model_used
+    }
+
+    sessions {
+        text session_id PK
+        text started_at
+        text ended_at
+        int entities_staged
+        int items_approved
+        int items_rejected
+        text summary
+        text topics "JSON array"
+        text architectural_themes "JSON array"
+        text decisions_made "JSON array"
+        text decisions_deferred "JSON array"
+        text elements_discussed "JSON array element IDs"
+        text domain_ids "JSON array"
+        text engagement_ref FK
+        text semantic_summary "optimised for vector search"
+    }
+
+    %% ═══════════════════════════════════════
+    %% Relationships
+    %% ═══════════════════════════════════════
+
+    domains ||--o{ motivation : "domain_id"
+    domains ||--o{ strategy : "domain_id"
+    domains ||--o{ business_architecture : "domain_id"
+    domains ||--o{ solution_architecture : "domain_id"
+    domains ||--o{ implementation : "domain_id"
+    domains ||--o{ solutions : "domain_id"
+    domains ||--o{ practice_artefacts : "domain_id"
+
+    engagements ||--o{ motivation : "engagement_ref"
+    strategy ||--o| strategy : "parent capability"
+
+    business_architecture ||--o| business_architecture : "parent"
+    business_architecture ||--o{ process_steps : "process has steps"
+    process_steps }o--o| solution_architecture : "agent assigned"
+
+    solutions ||--o{ solution_components : "groups"
+    solution_components }o--|| solution_architecture : "element"
+    solutions ||--o{ solution_diagrams : "has diagrams"
+    solutions ||--o{ solution_deployments : "deployed to"
+    deployment_targets ||--o{ solution_deployments : "hosts"
+    solutions }o--o| business_architecture : "business service"
+    implementation }o--o| solutions : "delivers"
+
+    staging_items }o--o| sessions : "from session"
+    staging_items }o--o| agent_runs : "from agent"
+    valid_relationships ||--o{ relationships : "validates"
+
+    governance_controls }o--|| practice_artefacts : "standard_id"
+    governance_controls }o--o| domains : "domain_id"
+    quality_evaluations }o--o| domains : "domain_id"
+    quality_evaluations }o--o| practice_artefacts : "decision_ref"
